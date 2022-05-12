@@ -1,11 +1,10 @@
 import MasterTable from "../modules/master_table"
-import MasterDetailTable from "../modules/master_detail_table";
+import end_users from "../../database/end_users";
 
 export default () => {
   return(
     <>
-      <MasterTable />
-      <MasterDetailTable />
+      <MasterTable data={end_users} />
     </>
   )
 };

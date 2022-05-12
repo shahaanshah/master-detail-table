@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Input, InputNumber, Form, Button, Card } from 'antd';
 import end_users from '../../database/end_users';
+import MasterDetailTable from './master_detail_table';
 
 const originData = end_users;
 
@@ -42,6 +43,7 @@ const EditableCell = ({
 const MasterTable = () => {
     const [form] = Form.useForm();
     const [data, setData] = useState(originData);
+    const [addresses, setAddresses] = useState();
     const [editingKey, setEditingKey] = useState('');
   
     const isEditing = (record) => record.key === editingKey;
@@ -85,6 +87,11 @@ const MasterTable = () => {
   
     const columns = [
       {
+        title: 'Title',
+        dataIndex: 'title',
+        editable: true,
+      },
+      {
         title: 'First Name',
         dataIndex: 'firstname',
         editable: true,
@@ -92,11 +99,6 @@ const MasterTable = () => {
       {
         title: 'Surname',
         dataIndex: 'surname',
-        editable: true,
-      },
-      {
-        title: 'Title',
-        dataIndex: 'title',
         editable: true,
       },
       {
@@ -146,40 +148,51 @@ const MasterTable = () => {
         }),
       };
     });
-    return (
-    <Card
-        bordered
-        size="small"
-        type="inner"
-        title="End Users"
-        extra={<Button type="primary">Add Row</Button>}
-      >
-      <Form form={form} component={false}>
-        <Table
-          // loading={true}
-          scroll={{ y: 200 }}
-          size="small"
-          components={{
-            body: {
-              cell: EditableCell,
-            },
-          }}
-          
-          dataSource={data}
-          columns={mergedColumns}
-          rowClassName="editable-row"
-          pagination={{
-            onChange: cancel,
-          }}
-          onRow={(record, rowIndex) => {
-          return {
-            onMouseEnter: event => {console.log(record.id)},
-          };
-        }}
-        />
-      </Form>
-    </Card>
 
+
+    const RenderMasterDetailTable = () => {
+      console.log("data",addresses)
+      return (
+        <MasterDetailTable addresses={addresses} />
+      );
+    }
+
+    return (
+    <>
+      <Card
+          bordered
+          size="small"
+          type="inner"
+          title="End Users"
+          extra={<Button type="primary">Add Row</Button>}
+        >
+        <Form form={form} component={false}>
+          <Table
+            // loading={true}
+            scroll={{ y: 200 }}
+            size="small"
+            components={{
+              body: {
+                cell: EditableCell,
+              },
+            }}
+            
+            dataSource={data}
+            columns={mergedColumns}
+            rowClassName="editable-row"
+            pagination={{
+              onChange: cancel,
+            }}
+            onRow={(record, rowIndex) => {
+            return {
+              onClick: event => {setAddresses(record.addresses); console.log(record.addresses);},
+            };
+          }}
+          />
+        </Form>
+      </Card>
+      <RenderMasterDetailTable />
+    </>
     );
 };
 

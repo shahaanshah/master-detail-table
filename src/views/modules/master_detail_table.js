@@ -1,209 +1,194 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
-import { Table, Input, Button, Popconfirm, Form } from 'antd';
-const EditableContext = React.createContext(null);
+import React, { useState } from 'react';
+import { Table, Input, InputNumber, Form, Button, Card } from 'antd';
 
-const EditableRow = ({ index, ...props }) => {
-  const [form] = Form.useForm();
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
   return (
-    <Form form={form} component={false}>
-      <EditableContext.Provider value={form}>
-        <tr {...props} />
-      </EditableContext.Provider>
-    </Form>
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{
+            margin: 0,
+          }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${title}!`,
+            },
+          ]}
+        >
+          {inputNode}
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
   );
 };
 
-const EditableCell = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef(null);
-  const form = useContext(EditableContext);
-  useEffect(() => {
-    if (editing) {
-      inputRef.current.focus();
-    }
-  }, [editing]);
-
-  const toggleEdit = () => {
-    setEditing(!editing);
-    form.setFieldsValue({
-      [dataIndex]: record[dataIndex],
-    });
-  };
-
-  const save = async () => {
-    try {
-      const values = await form.validateFields();
-      toggleEdit();
-      handleSave({ ...record, ...values });
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo);
-    }
-  };
-
-  let childNode = children;
-
-  if (editable) {
-    childNode = editing ? (
-      <Form.Item
-        style={{
-          margin: 0,
-        }}
-        name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-      </Form.Item>
-    ) : (
-      <div
-        className="editable-cell-value-wrap"
-        style={{
-          paddingRight: 24,
-        }}
-        onClick={toggleEdit}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  return <td {...restProps}>{childNode}</td>;
-};
-
-class MasterDetailTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.columns = [
+const MasterDetailTable = ({addresses}) => {
+    const [form] = Form.useForm();
+    const [data, setData] = useState(addresses);
+    const [editingKey, setEditingKey] = useState('');
+  
+    const isEditing = (record) => record.key === editingKey;
+  
+    const edit = (record) => {
+      form.setFieldsValue({
+        firstname: '',
+        surname: '',
+        title: '',
+        phone: '',
+        ip_address: '',
+        status_id: '',
+        ...record,
+      });
+      setEditingKey(record.key);
+    };
+  
+    const cancel = () => {
+      setEditingKey('');
+    };
+  
+    const save = async (key) => {
+      try {
+        const row = await form.validateFields();
+        const newData = [...data];
+        const index = newData.findIndex((item) => key === item.key);
+        if (index > -1) {
+          const item = newData[index];
+          newData.splice(index, 1, { ...item, ...row });
+          setData(newData);
+          setEditingKey('');
+        } else {
+          newData.push(row);
+          setData(newData);
+          setEditingKey('');
+        }
+      } catch (errInfo) {
+        console.log('Validate Failed:', errInfo);
+      }
+    };
+  
+    const columns = [
       {
-        title: 'name',
-        dataIndex: 'name',
-        width: '30%',
+        title: 'Username',
+        dataIndex: 'username',
         editable: true,
       },
       {
-        title: 'age',
-        dataIndex: 'age',
+        title: 'Email',
+        dataIndex: 'email',
+        editable: true,
       },
       {
-        title: 'address',
-        dataIndex: 'address',
+        title: 'Password',
+        dataIndex: 'password',
+        editable: true,
       },
       {
-        title: 'operation',
+        title: 'City',
+        dataIndex: 'city',
+        editable: true,
+      },
+      {
+        title: 'Street',
+        dataIndex: 'street',
+        editable: true,
+      },
+      {
+        title: 'Postal Code',
+        dataIndex: 'postal_code',
+        editable: true,
+      },
+      {
+        title: 'Action',
         dataIndex: 'operation',
-        render: (_, record) =>
-          this.state.dataSource.length >= 1 ? (
-            <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
-              <a>Delete</a>
-            </Popconfirm>
-          ) : null,
+        render: (_, record) => {
+          const editable = isEditing(record);
+          return editable ? (
+            <span>
+              <Button 
+                type="primary"
+                onClick={() => save(record.key)}
+                style={{
+                  marginRight: 8,
+                }}
+              >
+                Save
+              </Button>
+              <Button onClick={() => cancel()}>Cancel</Button>
+            </span>
+          ) : (
+            <Button disabled={editingKey !== ''} onClick={() => edit(record)}>
+              Edit
+            </Button>
+          );
+        },
       },
     ];
-    this.state = {
-      dataSource: [
-        {
-          key: '0',
-          name: 'Edward King 0',
-          age: '32',
-          address: 'London, Park Lane no. 0',
-        },
-        {
-          key: '1',
-          name: 'Edward King 1',
-          age: '32',
-          address: 'London, Park Lane no. 1',
-        },
-      ],
-      count: 2,
-    };
-  }
-
-  handleDelete = (key) => {
-    const dataSource = [...this.state.dataSource];
-    this.setState({
-      dataSource: dataSource.filter((item) => item.key !== key),
-    });
-  };
-  handleAdd = () => {
-    const { count, dataSource } = this.state;
-    const newData = {
-      key: count,
-      name: `Edward King ${count}`,
-      age: '32',
-      address: `London, Park Lane no. ${count}`,
-    };
-    this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1,
-    });
-  };
-  handleSave = (row) => {
-    const newData = [...this.state.dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, { ...item, ...row });
-    this.setState({
-      dataSource: newData,
-    });
-  };
-
-  render() {
-    const { dataSource } = this.state;
-    const components = {
-      body: {
-        row: EditableRow,
-        cell: EditableCell,
-      },
-    };
-    const columns = this.columns.map((col) => {
+    const mergedColumns = columns.map((col) => {
       if (!col.editable) {
         return col;
       }
-
+  
       return {
         ...col,
         onCell: (record) => ({
           record,
-          editable: col.editable,
+          inputType: col.dataIndex === 'age' ? 'number' : 'text',
           dataIndex: col.dataIndex,
           title: col.title,
-          handleSave: this.handleSave,
+          editing: isEditing(record),
         }),
       };
     });
     return (
-      <div>
-        <Button
-          onClick={this.handleAdd}
-          type="primary"
-          style={{
-            marginBottom: 16,
-          }}
-        >
-          Add a row
-        </Button>
+    <Card
+        bordered
+        size="small"
+        type="inner"
+        title="End Users Addresses"
+        extra={<Button type="primary">Add Row</Button>}
+      >
+      <Form form={form} component={false}>
         <Table
-          components={components}
-          rowClassName={() => 'editable-row'}
-          bordered
-          dataSource={dataSource}
-          columns={columns}
+          // loading={true}
+          scroll={{ y: 200 }}
+          size="small"
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          
+          dataSource={data}
+          columns={mergedColumns}
+          rowClassName="editable-row"
+          pagination={{
+            onChange: cancel,
+          }}
+          onRow={(record, rowIndex) => {
+          return {
+            onMouseEnter: event => {console.log(record.id)},
+          };
+        }}
         />
-      </div>
-    );
-  }
-}
+      </Form>
+    </Card>
 
-export default () => <MasterDetailTable />;
+    );
+};
+
+
+export default MasterDetailTable;
