@@ -20,7 +20,7 @@ export default () => {
         <Routes>
             <Route path="/login" element={isLoggedIn ? <Navigate push to="/" /> : <Login />} />
             <Route path="/" element={<Layout />}> 
-                <Route index element={<Dashboard />} />
+                <Route index element={<RequiresAuth><Dashboard /></RequiresAuth>} />
                 <Route path="/users" element={<Users />} />
             </Route>
         </Routes>

@@ -40,6 +40,7 @@ const MasterDetailTable = ({addresses}) => {
     const [form] = Form.useForm();
     const [data, setData] = useState(addresses);
     const [editingKey, setEditingKey] = useState('');
+    const [activeTabKey, setActiveTabKey] = useState('Adresses');
   
     const isEditing = (record) => record.key === editingKey;
   
@@ -130,13 +131,25 @@ const MasterDetailTable = ({addresses}) => {
               <Button onClick={() => cancel()}>Cancel</Button>
             </span>
           ) : (
-            <Button disabled={editingKey !== ''} onClick={() => edit(record)}>
+            <Button size="small" disabled={editingKey !== ''} onClick={() => edit(record)}>
               Edit
             </Button>
           );
         },
       },
     ];
+
+    const tabListNoTitle = [
+      {
+        key: 'Adresses',
+        tab: 'Adresses',
+      },
+      {
+        key: 'Tokens',
+        tab: 'Tokens',
+      },
+    ];
+
     const mergedColumns = columns.map((col) => {
       if (!col.editable) {
         return col;
@@ -153,18 +166,30 @@ const MasterDetailTable = ({addresses}) => {
         }),
       };
     });
+
+    const onTabChange = (key) => {
+      setActiveTabKey(key);
+    };
+
     return (
     <Card
         bordered
         size="small"
         type="inner"
-        title="End Users Addresses"
-        extra={<Button type="primary">Add Row</Button>}
+        // title="Addresses"
+        // extra={<Button type="primary">Add Row</Button>}
+        style={{marginTop: "20px"}}
+        bodyStyle={{ padding: "0" }}
+        tabList={tabListNoTitle}
+        activeTabKey={activeTabKey}
+        onTabChange={(key) => {
+          onTabChange(key);
+        }}
       >
       <Form form={form} component={false}>
         <Table
           // loading={true}
-          scroll={{ y: 200 }}
+          scroll={{ y: 250 }}
           size="small"
           components={{
             body: {

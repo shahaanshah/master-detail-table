@@ -1,10 +1,5 @@
-import MasterTable from "../modules/master_table"
-import end_users from "../../database/end_users";
+const Dashboard = () => {
+  return <h1>Dashboard</h1>;
+}
 
-export default () => {
-  return(
-    <>
-      <MasterTable data={end_users} />
-    </>
-  )
-};
+export default () => <Dashboard />;

@@ -9,7 +9,6 @@ const initialState = {
 if(window.localStorage.getItem("username"))
 {
   initialState.isLoggedIn = true;
-
 }
 
 const authReducer = (state, { type }) => {

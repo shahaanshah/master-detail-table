@@ -10,13 +10,11 @@ import AuthProvider from "./contexts/auth";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <StrictMode>
     <AuthProvider>
       <Router>
         <App />
       </Router>
     </AuthProvider>
-  </StrictMode>
 );
 
 reportWebVitals();

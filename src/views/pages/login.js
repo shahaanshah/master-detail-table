@@ -5,10 +5,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const admin = {
-  username: "faiz",
-  password: "123456"
+  username: "admin@example.com",
+  password: "password"
 };
-
+ 
 const NormalLoginForm = () => {
   const {
     authState: { isLoggedIn },
