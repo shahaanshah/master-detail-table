@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, memo } from "react";
-import { Table, Input, Form, Button, Card, Popover, Space, Tag, InputNumber, Row, Col, Divider } from 'antd';
+import { Table, Input, Form, Button, Card, Popover, Space, Tag, Select, Checkbox, Row, Col, AutoComplete, DatePicker, message, Segmented, Switch } from 'antd';
 // import UsersTable from "../components/UserTable";
 import "../styles/users.css";
-import { CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined, FilterOutlined, ReloadOutlined, UserOutlined, PhoneOutlined, GlobalOutlined, IdcardOutlined, LockOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import moment from 'moment';
 
 const UsersTable = memo(({ users, loading, onClickRow, onEditRow }) => {
 
@@ -97,18 +98,8 @@ const UsersTable = memo(({ users, loading, onClickRow, onEditRow }) => {
       dataIndex: 'MOBILTELEFON',
     },
     {
-      title: 'Asp benutzername',
-      dataIndex: 'ASP_BENUTZERNAME',
-      width: "200px"
-    },
-    {
       title: 'Ip adresse',
       dataIndex: 'IP_ADRESSE',
-    },
-    {
-      title: 'Mw benutzername',
-      dataIndex: 'MW_BENUTZERNAME',
-      width: "200px"
     },
     {
       title: 'Erstellt am',
@@ -129,10 +120,7 @@ const UsersTable = memo(({ users, loading, onClickRow, onEditRow }) => {
       render: (_, record) => {
         return (
           <>
-            <Button size="small" style={{ marginRight: 5 }} onClick={() => onEditRow(record, "edit")}>
-              <EditOutlined />
-            </Button>
-            <Button size="small" type="primary" danger onClick={() => onClickRow(record, "delete")}>
+            <Button size="small" onClick={() => onClickRow(record, "delete")}>
               <DeleteOutlined />
             </Button>
           </>
@@ -230,26 +218,27 @@ const AdressesTable = memo(({ addresses, loading }) => {
   />;
 });
 
-const XcnfBenutzerTableColumns = [
-  {
-    title: 'Benutzer Id',
-    dataIndex: 'BENUTZER_ID',
-    editable: true,
-  },
-  {
-    title: 'Action',
-    dataIndex: 'operation',
-    render: (_, record) => {
-      return (
-        <Button size="small">
-          Edit
-        </Button>
-      )
-    },
-  },
-];
-
 const XcnfBenutzerTable = memo(({ xcnf_benutzers, loading }) => {
+
+  const XcnfBenutzerTableColumns = [
+    {
+      title: 'Benutzer Id',
+      dataIndex: 'BENUTZER_ID',
+      editable: true,
+    },
+    {
+      title: 'Action',
+      dataIndex: 'operation',
+      render: (_, record) => {
+        return (
+          <Button size="small">
+            Edit
+          </Button>
+        )
+      },
+    },
+  ];
+
   return <Table
     loading={loading}
     scroll={{ y: 250 }}
@@ -261,39 +250,237 @@ const XcnfBenutzerTable = memo(({ xcnf_benutzers, loading }) => {
   />;
 });
 
-const AnwenderForm = memo(({ addresses, loading }) => {
-
+const AnwenderForm = memo(({ suggestions, user, resetForm, updateForm }) => {
+  const [checkbox, setCheckbox] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [action, setAction] = useState('create');
   const [form] = Form.useForm();
 
 
-  const style = {
-    padding: '8px 0',
-  };
+  useEffect(() => {
+    if (user) {
+      setAction('update')
+      const {OBK, MAP, MAP_DOK, ARTLEX, MW, ASP, MON} = user;
+      let array = [];
+      if(OBK == '1') array.push("OBK")
+      if(MAP == '1') array.push("MAP")
+      if(MAP_DOK == '1') array.push("MAP_DOK")
+      if(ARTLEX == '1') array.push("ARTLEX")
+      if(MW == '1') array.push("MW")
+      if(ASP == '1') array.push("ASP")
+      if(MON == '1') array.push("MON")
+
+      setCheckbox(array);
+    }
+  }, [])
+
+  const options = [
+    { label: "OBK (J/N)", value: "OBK" },
+    { label: "MAP (J/N)", value: "MAP" },
+    { label: "MAP_DOK (J/N)", value: "MAP_DOK" },
+    { label: "ARTLEX (J/N)", value: "ARTLEX" },
+    { label: "MW (J/N)", value: "MW" },
+    { label: "ASP (J/N)", value: "ASP" },
+    { label: "MON (J/N)", value: "MON" },
+  ];
+
+  const handleChangeCheckbox = (value) => {
+    setCheckbox(value);
+  }
+
+  const onFinish = async (value) => {
+
+    setLoading(true);
+
+    const Fachanwendungen = checkbox.reduce((a, v) => ({ ...a, [v]: "1" }), {});
+    const data = {
+      ...value,
+      ERSTELLT_AM: (value.ERSTELLT_AM) ? value.ERSTELLT_AM.format("DD-MMMM-YYYY") : '',
+      GELOESCHT_AM: (value.GELOESCHT_AM) ? value.GELOESCHT_AM.format("DD-MMMM-YYYY") : '',
+      ...Fachanwendungen
+    };
+
+    if (user) {
+      try {
+        const response = await axios.put(`http://localhost:4400/api/v1/users/${user.ANWENDER_ID}`, {
+          ...data
+        });
+
+        if (response.status === 201) {
+          setTimeout(() => {
+            message.success({
+              content: response.data.message,
+              key: 'updatable',
+              duration: 3,
+            });
+            setLoading(false)
+          }, 100);
+        }
+        updateForm();
+
+      }
+      catch (error) {
+        if (error.response.status === 500) {
+          setTimeout(() => {
+            message.error({
+              content: error.response.data.message,
+              key: 'updatable',
+              duration: 3,
+            });
+            setLoading(false)
+          }, 100);
+        }
+      }
+    }
+    else {
+      try {
+        const response = await axios.post("http://localhost:4400/api/v1/users", {
+          ...data
+        });
+
+        if (response.status === 201) {
+          setTimeout(() => {
+            message.success({
+              content: response.data.message,
+              key: 'updatable',
+              duration: 3,
+            });
+            setLoading(false)
+          }, 100);
+        }
+
+        setLoading(false)
+
+      }
+      catch (error) {
+        if (error.response.status === 500) {
+          setTimeout(() => {
+            message.error({
+              content: error.response.data.message,
+              key: 'updatable',
+              duration: 3,
+            });
+            setLoading(false)
+          }, 100);
+        }
+      }
+    }
+
+  }
+
+  const handleReset = () => {
+    setAction('create');
+    resetForm();
+  }
+
 
   return (
-    <Row>
-      <Col xs={{ span: 12, offset: 6 }} lg={{ span: 12, offset: 6 }}>
-        <Form layout="vertical">
-          <Divider><h4>Schaffen Anwender</h4></Divider>
+    <Row style={{ padding: "20px" }} >
+      <Col xs={{ span: 8, offset: 1 }} lg={{ span: 8, offset: 0 }}>
+        <Form
+          form={form}
+          layout="horizontal"
+          size="small"
+          onFinish={onFinish}
+          initialValues={{
+            ZUGRIFF: (user) ? user.ZUGRIFF : '',
+            TITEL: (user) ? user.TITEL : '',
+            VORNAME: (user) ? user.VORNAME : '',
+            NACHNAME: (user) ? user.NACHNAME : '',
+            MOBILTELEFON: (user) ? user.MOBILTELEFON : '',
+            IP_ADRESSE: (user) ? user.IP_ADRESSE : '',
+            STATUS_ID: (user) ? user.STATUS_ID.toString() : '1',
+            ERSTELLT_AM: (user && user.ERSTELLT_AM !== null) ? moment(user.ERSTELLT_AM) : '',
+            GELOESCHT_AM: (user && user.GELOESCHT_AM !== null) ? moment(user.GELOESCHT_AM) : '',
+            BEMERKUNG: (user) ? user.BEMERKUNG : ''
+          }}
+        >
           <Row gutter={[16, 0]}>
-            <Col xs={{ span: 24 }} lg={{ span: 12 }}>
-              <Form.Item label="Zugriff:">
-                <Input placeholder="input placeholder" />
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 16 }} labelCol={{ lg: 6 }} name="ZUGRIFF" label="Zugriff:">
+                <Input placeholder="Zugriff" allowClear suffix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />
               </Form.Item>
             </Col>
-            <Col xs={{ span: 24 }} lg={{ span: 12 }}>
-              <Form.Item label="Titel:">
-                <Input placeholder="input placeholder" />
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 6 }} labelCol={{ lg: 6 }} name="TITEL" label="Titel:">
+                <AutoComplete
+                  options={suggestions}
+                  children={<Input placeholder="Titel" allowClear suffix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />}
+                  filterOption={(inputValue, option) =>
+                    option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                  }
+
+                />
               </Form.Item>
             </Col>
-            <Col xs={{ span: 24 }} lg={{ span: 12 }}>
-              <Form.Item label="Vorname:" style={{ marginBottom: "0px" }}>
-                <Input placeholder="input placeholder" />
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 16 }} labelCol={{ lg: 6 }} name="VORNAME" label="Vorname:">
+                <Input placeholder="Vorname" allowClear suffix={<IdcardOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />
               </Form.Item>
             </Col>
-            <Col xs={{ span: 24 }} lg={{ span: 12 }}>
-              <Form.Item label="Nachname:" style={{ marginBottom: "0px" }}>
-                <Input placeholder="input placeholder" />
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 16 }} labelCol={{ lg: 6 }} name="NACHNAME" label="Nachname:">
+                <Input placeholder="Nachname" allowClear suffix={<IdcardOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 16 }} labelCol={{ lg: 6 }} name="MOBILTELEFON" label="Mobil / Telefon:">
+                <Input placeholder="Mobil / Telefon" allowClear suffix={<PhoneOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 16 }} labelCol={{ lg: 6 }} name="IP_ADRESSE" label="IP Adresse:">
+                <Input placeholder="IP Adresse" allowClear suffix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />} />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 6 }} labelCol={{ lg: 6 }} name="STATUS_ID" label="Status:">
+                <Select placeholder="Status">
+                  <Select.Option value="1">Aktiv</Select.Option>
+                  <Select.Option value="0">Deaktiv</Select.Option>
+                  <Select.Option value="2">Gelöscht</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 6 }} labelCol={{ lg: 6 }} name="ERSTELLT_AM" label="Erstellt Datum">
+                <DatePicker placeholder="Erstellt Datum" format="MM-DD-YYYY" style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 6 }} labelCol={{ lg: 6 }} name="GELOESCHT_AM" label="Gelöscht Datum">
+                <DatePicker placeholder="Gelöscht Datum" format="MM-DD-YYYY" style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 19 }} labelCol={{ lg: 6 }} label="Fachanwendungen:">
+                <fieldset>
+                  <Checkbox.Group
+                    options={options}
+                    value={checkbox}
+                    onChange={handleChangeCheckbox}
+                  />
+                </fieldset>
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item wrapperCol={{ lg: 19 }} labelCol={{ lg: 6 }} name="BEMERKUNG" label="Bemerkung:">
+                <Input.TextArea rows={4} placeholder="Bemerkung" />
+              </Form.Item>
+            </Col>
+            <Col xs={{ span: 24 }} lg={{ span: 24 }}>
+              <Form.Item style={{ textAlign: 'center', marginTop: 10 }} >
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  {(user) ? "Aktualisieren" : "Speichern"}
+                </Button>
+                {(user) ? (
+                  <Button htmlType="button" onClick={handleReset}>
+                    Reset
+                  </Button>
+                ) : (
+                  <></>
+                )}
+
               </Form.Item>
             </Col>
           </Row>
@@ -304,15 +491,35 @@ const AnwenderForm = memo(({ addresses, loading }) => {
 });
 
 
+const UserFilters = ({ onSearch, onReload }) => {
+  const [popover, setPopover] = useState(false);
+  const handlePopover = (value) => {
+    setPopover(value);
+  };
+  return (
+    <Space>
+      <Button size="small" onClick={() => onReload()}><ReloadOutlined /> Reload</Button>
+      <Form>
+        <Form.Item style={{ marginBottom: "0px" }}>
+          <Input.Search size="small" allowClear placeholder="Search..." onSearch={(value) => onSearch(value)} />
+        </Form.Item>
+      </Form>
+      <Popover content={<a>Close</a>} title="Title" trigger="click" visible={popover} onVisibleChange={handlePopover}>
+        <Button size="small"><FilterOutlined /> Filter</Button>
+      </Popover>
+    </Space>
+  );
+}
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState();
   const [addresses, setAddresses] = useState();
   const [xcnfBenutzers, setXcnfBenutzers] = useState();
+  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addressesLoading, setAddressesLoading] = useState(false);
-  const [popover, setPopover] = useState(false);
-  const [activeTabKey, setActiveTabKey] = useState('Adresses');
+  const [activeTabKey, setActiveTabKey] = useState('Anwender');
   const [filters, setFilters] = useState({
     offset: 0,
     limit: 10000,
@@ -321,10 +528,6 @@ const Users = () => {
     start_date: "",
     end_date: ""
   });
-
-  const handlePopover = (value) => {
-    setPopover(value);
-  };
 
   const handleChangeSearch = (value) => {
     setLoading(true);
@@ -344,8 +547,17 @@ const Users = () => {
     const response = await axios.get("http://localhost:4400/api/v1/users", {
       params: filters
     });
+
     setUsers(response.data.data);
+    const filterd = response.data.data.filter(item => item.TITEL !== null && item.TITEL !== undefined).map(item => item.TITEL.replace(/\s/g, ''));
+    const suggs = [...new Set(filterd)].map(item => { return { value: item } });
+    if (selectedUser) {
+      const select = response.data.data.filter(item => item.ANWENDER_ID === selectedUser.ANWENDER_ID)[0];
+      setSelectedUser(select);
+    }
+    setSuggestions(suggs);
     setLoading(false);
+
   }
 
   const fetchUsersWithFilters = async (_filters) => {
@@ -359,29 +571,29 @@ const Users = () => {
 
   const tabListNoTitle = [
     {
+      key: 'Anwender',
+      tab: 'NAIS Anwender',
+    },
+    {
       key: 'Adresses',
-      tab: 'Adresse',
+      tab: 'Anwender Adresse',
     },
     {
       key: 'XcnfBenutzer',
-      tab: 'Xcnf Benutzer',
-    },
-    {
-      key: 'Anwender',
-      tab: 'Anwender',
-    },
+      tab: 'XCNF Benutzer',
+    }
   ];
 
   const onTabChange = (key) => {
     setActiveTabKey(key);
   };
 
-  const TabData = ({ addresses, loading }) => {
+  const TabData = ({ addresses, loading, suggestions, user, resetForm, updateForm }) => {
     if (activeTabKey == "Adresses")
       return <AdressesTable addresses={addresses} loading={loading} />;
     else if (activeTabKey == "XcnfBenutzer")
       return <XcnfBenutzerTable loading={loading} />;
-    else return <AnwenderForm />;
+    else return <AnwenderForm suggestions={suggestions} user={user} resetForm={resetForm} updateForm={updateForm} />;
   }
 
 
@@ -398,9 +610,17 @@ const Users = () => {
     setAddressesLoading(false);
   }
 
-  const handleEditRow = (record, action) => {
-    console.log(action);
-    setActiveTabKey('Anwender');
+  const handleReload = () => {
+    setLoading(true);
+    fetchUsers();
+  }
+
+  const resetForm = () => {
+    setSelectedUser('');
+  }
+
+  const updateForm = () => {
+    fetchUsers();
   }
 
   return (
@@ -412,20 +632,13 @@ const Users = () => {
         type="inner"
         bodyStyle={{ padding: "0" }}
         title={
-          <Space>
-            <Form>
-              <Form.Item style={{ marginBottom: "0x" }}>
-                <Input.Search size="small" allowClear placeholder="Search..." onSearch={handleChangeSearch} />
-              </Form.Item>
-            </Form>
-            <Popover content={<a>Close</a>} title="Title" trigger="click" visible={popover} onVisibleChange={handlePopover}>
-              <Button size="small"><FilterOutlined /> Filter</Button>
-            </Popover>
-            <Button size="small"><PlusOutlined /> Add</Button>
-          </Space>
+          <UserFilters
+            onSearch={(value) => handleChangeSearch(value)}
+            onReload={() => handleReload()}
+          />
         }
       >
-        <UsersTable users={users} loading={loading} onClickRow={(record) => handleClickRow(record)} onEditRow={(record, action) => handleEditRow(record, action)} />
+        <UsersTable users={users} loading={loading} onClickRow={(record) => handleClickRow(record)} />
       </Card>
       {/* Users Master Table End */}
 
@@ -437,15 +650,14 @@ const Users = () => {
         // title="Addresses"
         // extra={<Button type="primary">Add Row</Button>}
         style={{ marginTop: "20px" }}
-        bodyStyle={{ padding: "0" }}
+        bodyStyle={{ padding: "0", paddingTop: "5px" }}
         tabList={tabListNoTitle}
         activeTabKey={activeTabKey}
         onTabChange={(key) => {
           onTabChange(key);
         }}
       >
-
-        <TabData addresses={addresses} xcnfBenutzers={xcnfBenutzers} loading={addressesLoading} />
+        <TabData addresses={addresses} xcnfBenutzers={xcnfBenutzers} loading={addressesLoading} suggestions={suggestions} user={selectedUser} resetForm={() => resetForm()} updateForm={() => updateForm()} />
 
       </Card>
       {/* Users Detail Table End */}

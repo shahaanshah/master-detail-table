@@ -1,4 +1,4 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import { Layout as AppMain, Menu, Breadcrumb, Modal, message, Button } from 'antd';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { DashboardOutlined, UserOutlined, LockOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
@@ -6,13 +6,13 @@ import { useAuth } from "../../hooks/useAuth";
 
 
 const menuItems = [
+    // {
+    //     path: '/',
+    //     label: 'Dashboard',
+    //     icon: <DashboardOutlined />
+    // },
     {
         path: '/',
-        label: 'Dashboard',
-        icon: <DashboardOutlined />
-    },
-    {
-        path: '/users',
         label: 'Users',
         icon: <UserOutlined />
     },
