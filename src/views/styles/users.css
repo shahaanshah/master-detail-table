@@ -1,70 +1,89 @@
-.ant-table-tbody{
+.ant-table-tbody {
     padding: 0 !important;
 }
-.ant-table-tbody > tr > td{
+
+.ant-table-tbody>tr>td {
     padding: 2px 8px !important;
 }
-thead[class*="ant-table-thead"] th{
+
+thead[class*="ant-table-thead"] th {
     background-color: #E6F7FF !important;
 }
-.ant-layout{
+
+.ant-layout {
     background-color: #DDD !important;
 }
+
 .ant-table-pagination-right {
     justify-content: center !important;
 }
+
 .ant-table-pagination.ant-pagination {
     margin: 10px 0 !important;
 }
-.ant-card-type-inner .ant-card-head{
+
+.ant-card-type-inner .ant-card-head {
     background-color: #FFFFFF !important;
 }
-.time-table-row-select > .ant-spin-nested-loading > .ant-spin-container > div > .ant-table-content > .ant-table-body > table > tbody > tr:hover  {
+
+.time-table-row-select>.ant-spin-nested-loading>.ant-spin-container>div>.ant-table-content>.ant-table-body>table>tbody>tr:hover {
     background: #E6F7FF !important;
 }
-.ant-table-row:hover, .ant-table-row:hover td{
+
+.ant-table-row:hover,
+.ant-table-row:hover td {
     background: #E6F7FF !important;
 }
-.ant-btn.ant-btn-default{
-    background: #ffffff; /* Old browsers */
-    background: -moz-linear-gradient(top,  #ffffff 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  #ffffff 0%,#f1f1f1 50%,#e1e1e1 51%,#f6f6f6 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  #ffffff 0%,#f1f1f1 50%,#e1e1e1 51%,#f6f6f6 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
+
+.ant-btn.ant-btn-default {
+    background: #ffffff;
+    /* Old browsers */
+    background: -moz-linear-gradient(top, #ffffff 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #ffffff 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #ffffff 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6', GradientType=0);
+    /* IE6-9 */
 }
 
 table.GeneratedTable {
-  width: 100%;
-  background-color: #ffffff;
-  border-collapse: collapse;
-  border-width: 1px;
-  border-color: #dbdbdb;
-  border-style: solid;
-  color: #000000;
+    width: 100%;
+    background-color: #ffffff;
+    border-collapse: collapse;
+    border-width: 1px;
+    border-color: #dbdbdb;
+    border-style: solid;
+    color: #000000;
 }
 
-table.GeneratedTable td, table.GeneratedTable th {
-  border-width: 1px;
-  border-color: #f0f0f0;
-  border-style: solid;
+table.GeneratedTable td,
+table.GeneratedTable th {
+    border-width: 1px;
+    border-color: #f0f0f0;
+    border-style: solid;
 }
 
 table.GeneratedTable thead {
-  background-color: #e6f7ff;
+    background-color: #e6f7ff;
 }
-.ant-row.ant-form-item{
+
+.ant-row.ant-form-item {
     margin-bottom: 10px;
 }
+
 .ant-form-horizontal .ant-form-item-label {
     text-align: left;
 }
+
 .ant-checkbox-wrapper.ant-checkbox-wrapper {
     margin-left: 0px !important;
     margin-right: 12px !important;
 }
 
 
-fieldset{
+fieldset {
     border: 1px solid #d9d9d9 !important;
     padding: 10px 20px !important;
 }
@@ -74,10 +93,44 @@ fieldset{
     width: unset !important;
     margin-bottom: 0px;
     padding: 0px;
-    color: rgba(0,0,0,.85) !important;
+    color: rgba(0, 0, 0, .85) !important;
     font-size: 14px;
     line-height: inherit;
     border: 0 !important;
     border-bottom: 0;
     margin: 0px 0px !important;
 }
+
+.react-resizable {
+    position: relative !important;
+    background-clip: padding-box !important;
+}
+
+.react-resizable-handle {
+    position: absolute !important;
+    right: -5px !important;
+    bottom: 0 !important;
+    z-index: 1 !important;
+    width: 10px !important;
+    height: 100% !important;
+    cursor: col-resize !important;
+}
+
+.react-resizable {
+    position: relative;
+    background-clip: padding-box;
+}
+
+.react-resizable-handle {
+    position: absolute;
+    right: -5px;
+    bottom: 0;
+    z-index: 1;
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+}
+
+/* .ant-table-selection-column {
+    display: none;
+  } */

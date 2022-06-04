@@ -13,7 +13,7 @@ const menuItems = [
     // },
     {
         path: '/',
-        label: 'Users',
+        label: 'NAIS Anwender',
         icon: <UserOutlined />
     },
 ];
@@ -70,7 +70,7 @@ const Layout = () => {
 
                     <Menu.Item key={'/logout'} onClick={handleLogout}>
                         <LockOutlined />
-                        <span>Logout</span>
+                        <span>Abmelden</span>
                     </Menu.Item>
                 </Menu>
                 {/* <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['/']} selectedKeys={[location.pathname]} items={menuItems} /> */}

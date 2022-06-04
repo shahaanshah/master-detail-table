@@ -1,3 +1,4 @@
+import React from 'react';
 import Login from "../views/pages/login";
 import Dashboard from "../views/pages/dashboard";
 import Users from "../views/pages/users";
