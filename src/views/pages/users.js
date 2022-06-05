@@ -9,6 +9,7 @@ import UsersForm from "../modules/users/UsersForm";
 import AddressesTable from "../modules/users/AddressesTable";
 import EditableAddressesTable from "../modules/users/EditableAddressesTable";
 import XcnfBenutzerTable from "../modules/users/XcnfBenutzerTable";
+import EditableXcnfBenutzerTable from "../modules/users/EditableXcnfBenutzerTable";
 
 
 const Users = () => {
@@ -123,6 +124,7 @@ const Users = () => {
   const fetchUserDetails = async (record) => {
     setUserDetailLoading(true);
     const response = await axios.get(`http://localhost:4400/api/v1/addresses/user/${record.ANWENDER_ID}`);
+    console.log(response)
     setAddresses(response.data.adresse);
     setXcnfBenutzers(response.data.xcnf_benutzers);
     setUserDetailLoading(false);
@@ -147,18 +149,25 @@ const Users = () => {
     {
       key: 'XcnfBenutzer',
       tab: 'XCNF-Benutzer',
+    },
+    {
+      key: 'eTokenHistorie',
+      tab: 'eToken Historie'
     }
   ];
 
-  const UserTabs = ({ addresses, loading, suggestions, user, resetForm, updateForm }) => {
+  const UserTabs = ({ addresses, xcnfBenutzers, loading, suggestions, user, resetForm, updateForm }) => {
     if (activeTabKey == "UsersForm")
       return <UsersForm suggestions={suggestions} user={user} resetForm={resetForm} updateForm={updateForm} />;
 
     if (activeTabKey == "Adresses")
-      return <EditableAddressesTable addresses={addresses} loading={loading} />;
+      return <EditableAddressesTable addresses={addresses} loading={loading} user={user} />;
 
     if (activeTabKey == "XcnfBenutzer")
-      return <XcnfBenutzerTable loading={loading} />;
+      return <EditableXcnfBenutzerTable loading={loading} xcnfBenutzers={xcnfBenutzers} user={user} />;
+    
+    if(activeTabKey == "eTokenHistorie")
+      return <></>;
   }
 
   const onTabChange = (key) => setActiveTabKey(key);

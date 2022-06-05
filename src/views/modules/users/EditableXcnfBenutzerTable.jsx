@@ -60,28 +60,19 @@ const EditableCell = ({
     );
 };
 
-const EditableAddressesTable = ({ addresses, loading, user }) => {
+const EditableAddressesTable = ({ xcnfBenutzers, loading, user }) => {
     const [form] = Form.useForm();
-    const [data, setData] = useState(addresses);
-    const [addressesLoading, setAddressesLoading] = useState(loading);
+    const [data, setData] = useState(xcnfBenutzers);
+    const [xcnfBenutzersLoading, setXcnfBenutzersLoading] = useState(loading);
     const [editingKey, setEditingKey] = useState('');
     const [newRow, setNewRow] = useState('');
 
     const isEditing = (record) => record.key === editingKey;
 
     const edit = (record) => {
-        const { DIENSTSTELLE_BUERO, STRASSE, PLZ, ORT, TELEFON, EMAIL, BENUTZERNAME, PASSWORT, GELOESCHT_AM, STATUS_ID } = record;
+        const { BENUTZER_ID } = record;
         form.setFieldsValue({
-            DIENSTSTELLE_BUERO: DIENSTSTELLE_BUERO || '',
-            STRASSE: STRASSE || '',
-            PLZ: PLZ || '',
-            ORT: ORT || '',
-            TELEFON: TELEFON || '',
-            EMAIL: EMAIL || '',
-            BENUTZERNAME: BENUTZERNAME || '',
-            PASSWORT: PASSWORT || '',
-            GELOESCHT_AM: (GELOESCHT_AM) ? moment(GELOESCHT_AM, 'MM-DD-YYYY') : '',
-            STATUS_ID: STATUS_ID.toString() || '1',
+            BENUTZER_ID: BENUTZER_ID || '',
         });
         setEditingKey(record.key);
     };
@@ -96,7 +87,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
     };
 
     const CreateAddress = async (record, key) => {
-        setAddressesLoading(true);
+        setXcnfBenutzersLoading(true);
         try {
             const response = await axios.post(`http://localhost:4400/api/v1/addresses/user/${user.ANWENDER_ID}`, {
                 ...record
@@ -125,7 +116,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
                         key: 'updatable',
                         duration: 3,
                     });
-                    setAddressesLoading(false)
+                    setXcnfBenutzersLoading(false)
                 }, 100);
             }
 
@@ -138,14 +129,14 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
                         key: 'updatable',
                         duration: 3,
                     });
-                    setAddressesLoading(false)
+                    setXcnfBenutzersLoading(false)
                 }, 100);
             }
         }
     }
 
     const UpdateAddress = async (record, key, ADRESSE_ID) => {
-        setAddressesLoading(true);
+        setXcnfBenutzersLoading(true);
         try {
             const response = await axios.put(`http://localhost:4400/api/v1/addresses/${ADRESSE_ID}`, {
                 ...record
@@ -174,7 +165,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
                         key: 'updatable',
                         duration: 3,
                     });
-                    setAddressesLoading(false)
+                    setXcnfBenutzersLoading(false)
                 }, 100);
             }
 
@@ -187,7 +178,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
                         key: 'updatable',
                         duration: 3,
                     });
-                    setAddressesLoading(false)
+                    setXcnfBenutzersLoading(false)
                 }, 100);
             }
         }
@@ -222,81 +213,10 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
 
     const columns = [
         {
-            title: 'Dienstelle / Büro',
-            dataIndex: 'DIENSTSTELLE_BUERO',
+            title: 'XCNF-Benutzer ID',
+            dataIndex: 'BENUTZER_ID',
             editable: true,
             width: 260,
-        },
-        {
-            title: 'Straße',
-            dataIndex: 'STRASSE',
-            editable: true,
-            width: 260,
-        },
-        {
-            title: 'PLZ',
-            dataIndex: 'PLZ',
-            editable: true,
-            width: 100,
-        },
-        {
-            title: 'Ort',
-            dataIndex: 'ORT',
-            editable: true,
-            width: 120,
-        },
-        {
-            title: 'Telefon',
-            dataIndex: 'TELEFON',
-            editable: true,
-            width: 150,
-        },
-        {
-            title: 'Email',
-            dataIndex: 'EMAIL',
-            editable: true,
-            width: 150,
-        },
-        {
-            title: 'Benutzername',
-            dataIndex: 'BENUTZERNAME',
-            editable: true,
-            width: 150,
-        },
-        {
-            title: 'Passwort',
-            dataIndex: 'PASSWORT',
-            editable: true,
-            width: 150,
-        },
-        {
-            title: 'Gelöscht Datum',
-            dataIndex: 'GELOESCHT_AM',
-            width: 150,
-            editable: true,
-            render: (_, record) => {
-                return (record.GELOESCHT_AM) ? moment(record.GELOESCHT_AM).format("MM-DD-YYYY") : '';
-            }
-        },
-        {
-            title: 'Status',
-            dataIndex: 'STATUS_ID',
-            width: 150,
-            editable: true,
-            render: (_, record) => {
-                if (record.STATUS_ID == 0) {
-                    return <Tag color='yellow' key={record.STATUS_ID}>Deaktiv</Tag>;
-                }
-                else if (record.STATUS_ID == 1) {
-                    return <Tag color='blue' key={record.STATUS_ID}>Aktiv</Tag>;
-                }
-                else if (record.STATUS_ID == 2) {
-                    return <Tag color='red' key={record.STATUS_ID}>Gelöscht</Tag>
-                }
-                else {
-                    return <></>;
-                }
-            },
         },
         {
             title: 'Aktion',
@@ -340,42 +260,16 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
             return col;
         }
 
-        if (col.dataIndex === 'GELOESCHT_AM') {
-            return {
-                ...col,
-                onCell: (record) => ({
-                    record,
-                    inputType: 'date',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                }),
-            };
-        }
-        else if (col.dataIndex === 'STATUS_ID') {
-            return {
-                ...col,
-                onCell: (record) => ({
-                    record,
-                    inputType: 'select',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                }),
-            };
-        }
-        else {
-            return {
-                ...col,
-                onCell: (record) => ({
-                    record,
-                    inputType: 'text',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                }),
-            };
-        }
+        return {
+            ...col,
+            onCell: (record) => ({
+                record,
+                inputType: 'text',
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record),
+            }),
+        };
     });
 
 
@@ -388,16 +282,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
         }
 
         const newData = {
-            DIENSTSTELLE_BUERO: '',
-            STRASSE: '',
-            PLZ: '',
-            ORT: '',
-            TELEFON: '',
-            EMAIL: '',
-            BENUTZERNAME: '',
-            PASSWORT: '',
-            GELOESCHT_AM: '',
-            STATUS_ID: '1',
+            BENUTZER_ID: '',
             key: key,
         };
 
@@ -421,8 +306,8 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
         >
             <Table
                 bordered
-                loading={addressesLoading}
-                scroll={{ x: 1700, y: 250 }}
+                loading={xcnfBenutzersLoading}
+                scroll={{ y: 250 }}
                 size="small"
                 pagination={false}
                 components={{
@@ -443,7 +328,7 @@ const EditableAddressesTable = ({ addresses, loading, user }) => {
                     onClick={addNewRow}
                     disabled={editingKey !== ''}
                 >
-                    Neu Adresse
+                    Neu Benutzer
                 </Button>
             ) : <></>}
         </Form>

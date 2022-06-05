@@ -2,7 +2,7 @@ import React, {memo} from 'react';
 import {Table, Button} from "antd";
 import { EditOutlined } from '@ant-design/icons';
 
-const XcnfBenutzerTable = memo(({ xcnf_benutzers, loading }) => {
+const XcnfBenutzerTable = memo(({ xcnfBenutzers, loading }) => {
 
   const XcnfBenutzerTableColumns = [
     {
@@ -28,7 +28,7 @@ const XcnfBenutzerTable = memo(({ xcnf_benutzers, loading }) => {
       loading={loading}
       scroll={{ y: 250 }}
       size="small"
-      dataSource={xcnf_benutzers}
+      dataSource={xcnfBenutzers}
       columns={XcnfBenutzerTableColumns}
       pagination={false}
       style={{ height: '250px' }}
